@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data dan checkpoint hasil training (besar, jangan masuk repo)
+data/
+checkpoints/
+*.pt
+*.pth
+*.bin
+
+# Editor / OS
+.vscode/
+.DS_Store
