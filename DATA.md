@@ -1,7 +1,9 @@
 # Data Sources and Licenses
 
-Status: PLANNED. No corpus has been downloaded yet.
-This file is updated before any data is downloaded or used.
+Status: PLANNED. The full tokenizer sample has not been downloaded yet.
+A small trial run (2026-10-25, see "Trial run") tested the sampling script;
+it is not used for training or evaluation.
+This file is updated before any data is used for training or evaluation.
 
 ## Tokenizer training sample (planned)
 
@@ -37,12 +39,60 @@ Server-side file sizes (metadata, not downloaded): `sample/10BT` has 14 files
 - Evaluation documents are kept separate from tokenizer and model training data.
 - The FineWeb-2 `test` split is reserved for evaluation only. It is never used
   to train the tokenizer or any model. The dataset card says most languages
-  include a small test split that should not be trained on; its presence for
-  `ind_Latn` is still to be verified when the sample is taken.
+  include a small test split that should not be trained on. Its presence for
+  `ind_Latn` was verified on 2026-10-25 (metadata only): `data/ind_Latn/test`
+  has 1 file of 58,341,633 bytes. It was not read or downloaded.
 - FineWeb-Edu has only a `train` split on its card. English evaluation
-  documents will be held out from `sample-10BT` by a deterministic rule on the
-  document `id` (rule to be documented here before use) and excluded from training.
-- Deduplication method and results will be documented here.
+  documents are held out from `sample-10BT` by a deterministic rule on the
+  document `id` (see "Holdout rule") and excluded from training.
+- Deduplication: exact duplicate texts are removed inside the sample (see
+  "Sampling method"). Results for the full sample will be documented here.
+
+## Sampling method
+
+The sample is built by `scripts/sample_corpus.py` (version 0.1.1 at the time of
+writing). It plans first and downloads only when run with `--run`.
+
+- Plan mode reads only parquet footers (metadata) and prints the worst-case
+  traffic. No document text is read.
+- With `--run`, only the `text` and `id` column chunks of the selected row
+  groups are downloaded, using HTTP Range requests on the pinned revisions.
+- Traffic caps per language: 150 MB for the trial profile and 400 MB for the
+  full profile. The effective budget is 90% of the cap. The script never raises
+  a cap by itself and stops if the plan does not fit. Its byte counter counts
+  requested response bytes only; it is an estimate, not a measure of network
+  traffic.
+- Targets: trial = about 100 training documents per language; full = 100 MB of
+  training text per language (Indonesian:English 50:50).
+- Exact duplicate texts are removed within the sample (64-bit BLAKE2b digest of
+  the text). Near-duplicates are not removed.
+- Output goes to `data/`, which is git-ignored. `MANIFEST.json` records the
+  script version and SHA-256, the pinned revisions, the files and row groups
+  used, statistics, and checksums. It contains no document text and no
+  document ids.
+
+## Holdout rule
+
+About 1% of the sampled documents (both languages) are set aside for evaluation.
+A document is an evaluation document when
+
+    int.from_bytes(sha256(utf8(id)).digest()[:8], "big") % 100 == 0
+
+The decision depends only on the document `id`. Evaluation documents are written
+to separate `*_eval.jsonl` files, are not counted toward the training target,
+and are never used to train the tokenizer or any model. The official FineWeb-2
+`test` split is a separate, additional evaluation source and is not read by the
+script.
+
+## Trial run (2026-10-25)
+
+A trial run of version 0.1.1 tested the script on the real sources. It
+downloaded one row group per language (100 training documents each; 0 English
+and 2 Indonesian evaluation documents) with about 20 MB of counted traffic
+(about 21 MB measured on the network interface). The trial data was downloaded
+before this section was written. It is for testing only: the cheapest row
+groups were chosen, so it is not representative, and it is not used for
+training or evaluation.
 
 ## Provenance (from the dataset cards)
 
