@@ -1,0 +1,4 @@
+# Data sampling scripts (scripts/sample_corpus.py, scripts/sample_eval.py).
+-r requirements.txt
+pyarrow==26.0.0
+huggingface_hub==2.3.0

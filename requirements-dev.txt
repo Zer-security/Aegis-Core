@@ -1,0 +1,3 @@
+# Test suite.
+-r requirements-data.txt
+pytest==9.2.0

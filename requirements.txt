@@ -1,0 +1,6 @@
+# Core: model, training, evaluation, tokenizer.
+# Tested with Python 3.14.4. CPU-only PyTorch build.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1+cpu
+numpy==2.5.4
+tokenizers==0.23.3
