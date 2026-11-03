@@ -44,6 +44,16 @@ Default configuration:
 
 These values describe the implementation, not a measure of capability. The vocabulary setting is a placeholder default; training runs use the 16,384-token vocabulary of the project tokenizer.
 
+## Install
+
+~~~bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-dev.txt
+~~~
+
+`requirements.txt` covers the model, training, evaluation and tokenizer; `requirements-data.txt` adds the data-sampling scripts; `requirements-dev.txt` adds pytest. A clean install from `requirements-dev.txt` was checked in a fresh virtual environment (Python 3.14.4, CPU-only PyTorch); the test suite was only collected there, not run.
+
 ## Run the model tests
 
 Use an environment with Python, PyTorch and pytest installed. From the repository root, run:
@@ -68,10 +78,9 @@ The sampler is still experimental. Its presence should not be taken as a claim t
 
 The next substantial milestones are:
 
-1. Add a pinned requirements file so the environment can be reproduced.
-2. Add a model card and threat model (privacy, memorization, harmful output) before any weights are published.
-3. Run controlled experiments (more data, learning-rate search) and publish the results, including failures and limitations.
-4. Add task-level evaluation beyond perplexity.
+1. Add a model card and threat model (privacy, memorization, harmful output) before any weights are published.
+2. Run controlled experiments (more data, learning-rate search) and publish the results, including failures and limitations.
+3. Add task-level evaluation beyond perplexity.
 
 Changes should be small enough to review and accompanied by tests or evidence where practical. Loss curves, parameter counts and successful execution alone are not proof that a model has become more capable.
 
