@@ -1,11 +1,13 @@
 # Data Sources and Licenses
 
-Status: PLANNED. The full tokenizer sample has not been downloaded yet.
-A small trial run (2026-10-25, see "Trial run") tested the sampling script;
-it is not used for training or evaluation.
-This file is updated before any data is used for training or evaluation.
+Status (2026-11-03): the full sample (see "Full sample") and an independent
+evaluation set (see "Independent evaluation") have been downloaded and used for
+tokenizer and model training and for evaluation. Both were downloaded and used
+before this file was updated, which contradicts the earlier rule that this file
+is updated first. The small trial run (2026-10-25, see "Trial run") only tested
+the sampling script and is not used for training or evaluation.
 
-## Tokenizer training sample (planned)
+## Source datasets
 
 | Source | Language | License | Config |
 |---|---|---|---|
@@ -50,8 +52,8 @@ Server-side file sizes (metadata, not downloaded): `sample/10BT` has 14 files
 
 ## Sampling method
 
-The sample is built by `scripts/sample_corpus.py` (version 0.1.1 at the time of
-writing). It plans first and downloads only when run with `--run`.
+The sample is built by `scripts/sample_corpus.py` (version 0.1.3 as of 2026-11-03;
+the trial run used 0.1.1). It plans first and downloads only when run with `--run`.
 
 - Plan mode reads only parquet footers (metadata) and prints the worst-case
   traffic. No document text is read.
@@ -81,8 +83,9 @@ A document is an evaluation document when
 The decision depends only on the document `id`. Evaluation documents are written
 to separate `*_eval.jsonl` files, are not counted toward the training target,
 and are never used to train the tokenizer or any model. The official FineWeb-2
-`test` split is a separate, additional evaluation source and is not read by the
-script.
+`test` split is a separate, additional evaluation source and is not read by
+`sample_corpus.py`. It is read by `scripts/sample_eval.py` (see "Independent
+evaluation").
 
 ## Trial run (2026-10-25)
 
@@ -93,6 +96,37 @@ and 2 Indonesian evaluation documents) with about 20 MB of counted traffic
 before this section was written. It is for testing only: the cheapest row
 groups were chosen, so it is not representative, and it is not used for
 training or evaluation.
+
+## Full sample (2026-10-30)
+
+Built by `scripts/sample_corpus.py` v0.1.3 with `--profile full` on the pinned
+revisions. Numbers below are read from `data/sample/MANIFEST.json`.
+
+| Language | Source files used | Train docs | Train bytes | Holdout docs | Holdout bytes |
+|---|---|---|---|---|---|
+| en | 3 of 14 (`002`, `007`, `011`) | 20,633 | 100,001,478 | 201 | 1,069,075 |
+| id | 4 of 32 (`000`-`003`, `_00004`) | 26,623 | 100,002,975 | 284 | 1,013,808 |
+
+No exact duplicates were found inside the sample. Near-duplicates were not
+checked. The holdout documents come from the same source files as the training
+documents, so that separation is at document level only. The traffic cap was
+400 MB per language (effective 360 MB); counted requests were about 70 MB (en)
+and 93 MB (id).
+
+## Independent evaluation
+
+Built by `scripts/sample_eval.py` v0.1.0 to avoid sharing source files with
+training. Numbers are read from `data/eval_indep/MANIFEST.json`.
+
+| Language | Source | Docs | Bytes |
+|---|---|---|---|
+| en | FineWeb-Edu files `003`, `010` (not used for training) | 3,999 | 17,893,135 |
+| id | FineWeb-2 official `ind_Latn` test split (`000_00000.parquet`) | 3,821 | 14,343,144 |
+
+One English document was dropped as an exact duplicate of a training document.
+English independence holds at file level only: near-duplicates and shared
+upstream pages were not checked. The Indonesian test split is the official
+separate split.
 
 ## Provenance (from the dataset cards)
 
@@ -127,6 +161,13 @@ training or evaluation.
   information, and social biases. The dataset license does not clear the rights
   of every underlying page.
 - This is not legal advice.
+
+## Attribution
+
+This project uses data from HuggingFaceFW/fineweb-edu and
+HuggingFaceFW/fineweb-2, released under ODC-By 1.0 and derived from Common
+Crawl. Use is also subject to Common Crawl's Terms of Use. This is not legal
+advice.
 
 ## Citations
 
